@@ -1,0 +1,42 @@
+version: "3.8"  # Specifies the Docker Compose file format version
+
+services:  # Defines the services (containers) that will be run
+
+  # Backend service (Flask application)
+  backend:
+    image: atharva038/flaskapp  # The Docker image to use for the backend service
+    container_name: flaskapp    # Assigns a name to the container for easier identification
+    ports:
+      - "5000:5000"             # Maps port 5000 on the host to port 5000 in the container
+    environment:                # Sets environment variables for the Flask application
+      MYSQL_HOST: "mysql"       # Hostname of the MySQL service (container name)
+      MYSQL_USER: "admin"       # MySQL user for database access
+      MYSQL_PASSWORD: "admin"   # Password for the MySQL user
+      MYSQL_DB: "mydb"          # Name of the MySQL database to connect to
+    networks:
+      - twotier                 # Connects the backend service to the 'twotier' network
+    depends_on:
+      - mysql                   # Ensures the MySQL service starts before the backend service
+
+  # MySQL database service
+  mysql:
+    image: mysql:5.7            # The Docker image to use for the MySQL service
+    container_name: mysql       # Assigns a name to the container for easier identification
+    ports:
+      - "3306:3306"             # Maps port 3306 on the host to port 3306 in the container
+    environment:                # Sets environment variables for MySQL configuration
+      MYSQL_ROOT_PASSWORD: "root"   # Root user password for MySQL
+      MYSQL_DATABASE: "mydb"        # Creates a database named 'mydb'
+      MYSQL_USER: "admin"           # Creates a MySQL user named 'admin'
+      MYSQL_PASSWORD: "admin"       # Password for the 'admin' user
+    volumes:                      # Mounts volumes for persistent data and initialization scripts
+      - ./message.sql:/docker-entrypoint-initdb.d/message.sql  # Initializes the database with 'message.sql'
+      - mysql-data:/var/lib/mysql                              # Persists MySQL data across container restarts
+    networks:
+      - twotier                 # Connects the MySQL service to the 'twotier' network
+
+volumes:
+  mysql-data:                   # Defines a volume for persisting MySQL data
+
+networks:
+  twotier:                      # Defines a custom network named 'twotier' for communication between services
