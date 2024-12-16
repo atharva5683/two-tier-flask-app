@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: two-tier-app-service    # Removed the dash to make it a map
+spec:                           # Corrected typo
+  selector:
+    app: two-tier-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000          # Corrected case
+      nodePort: 30007           # Corrected case
+  type: NodePort                # Corrected case
+
